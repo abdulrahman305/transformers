@@ -61,11 +61,11 @@ class WatermarkDetectorOutput:
             Array containing confidence scores of a text being machine-generated for each element in the batch.
     """
 
-    num_tokens_scored: np.array = None
-    num_green_tokens: np.array = None
-    green_fraction: np.array = None
-    z_score: np.array = None
-    p_value: np.array = None
+    num_tokens_scored: Optional[np.array] = None
+    num_green_tokens: Optional[np.array] = None
+    green_fraction: Optional[np.array] = None
+    z_score: Optional[np.array] = None
+    p_value: Optional[np.array] = None
     prediction: Optional[np.array] = None
     confidence: Optional[np.array] = None
 
@@ -77,7 +77,7 @@ class WatermarkDetector:
     the correct device that was used during text generation, the correct watermarking arguments and the correct tokenizer vocab size.
     The code was based on the [original repo](https://github.com/jwkirchenbauer/lm-watermarking/tree/main).
 
-    See [the paper](https://arxiv.org/abs/2306.04634) for more information.
+    See [the paper](https://huggingface.co/papers/2306.04634) for more information.
 
     Args:
         model_config (`PretrainedConfig`):
@@ -257,7 +257,7 @@ class BayesianDetectorConfig(PretrainedConfig):
             Prior probability P(w) that a text is watermarked.
     """
 
-    def __init__(self, watermarking_depth: int = None, base_rate: float = 0.5, **kwargs):
+    def __init__(self, watermarking_depth: Optional[int] = None, base_rate: float = 0.5, **kwargs):
         self.watermarking_depth = watermarking_depth
         self.base_rate = base_rate
         # These can be set later to store information about this detector.
@@ -538,7 +538,7 @@ class SynthIDTextWatermarkDetector:
         context_repetition_mask = self.logits_processor.compute_context_repetition_mask(
             input_ids=tokenized_outputs,
         )
-        # context repitition mask shape [batch_size, output_len - (ngram_len - 1)]
+        # context repetition mask shape [batch_size, output_len - (ngram_len - 1)]
 
         combined_mask = context_repetition_mask * eos_token_mask
 

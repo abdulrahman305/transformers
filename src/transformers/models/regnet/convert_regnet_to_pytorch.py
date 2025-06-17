@@ -19,7 +19,7 @@ import json
 from dataclasses import dataclass, field
 from functools import partial
 from pathlib import Path
-from typing import Callable, Dict, List, Tuple
+from typing import Callable, Dict, List, Optional, Tuple
 
 import timm
 import torch
@@ -90,7 +90,7 @@ class ModuleTransfer:
         for dest_m, src_m in zip(dest_traced, src_traced):
             dest_m.load_state_dict(src_m.state_dict())
             if self.verbose == 1:
-                print(f"Transfered from={src_m} to={dest_m}")
+                print(f"Transferred from={src_m} to={dest_m}")
 
 
 class FakeRegNetVisslWrapper(nn.Module):
@@ -218,7 +218,7 @@ def convert_weight_and_push(
         print(f"Pushed {name}")
 
 
-def convert_weights_and_push(save_directory: Path, model_name: str = None, push_to_hub: bool = True):
+def convert_weights_and_push(save_directory: Path, model_name: Optional[str] = None, push_to_hub: bool = True):
     filename = "imagenet-1k-id2label.json"
     num_labels = 1000
     expected_shape = (1, num_labels)
@@ -305,7 +305,7 @@ def convert_weights_and_push(save_directory: Path, model_name: str = None, push_
         "regnet-y-320": ImageNetPreTrainedConfig(
             depths=[2, 5, 12, 1], hidden_sizes=[232, 696, 1392, 3712], groups_width=232
         ),
-        # models created by SEER -> https://arxiv.org/abs/2202.08360
+        # models created by SEER -> https://huggingface.co/papers/2202.08360
         "regnet-y-320-seer": RegNetConfig(depths=[2, 5, 12, 1], hidden_sizes=[232, 696, 1392, 3712], groups_width=232),
         "regnet-y-640-seer": RegNetConfig(depths=[2, 5, 12, 1], hidden_sizes=[328, 984, 1968, 4920], groups_width=328),
         "regnet-y-1280-seer": RegNetConfig(

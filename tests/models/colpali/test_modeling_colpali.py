@@ -1,4 +1,3 @@
-# coding=utf-8
 # Copyright 2024 The HuggingFace Inc. team. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,7 +19,6 @@ from typing import ClassVar
 
 import torch
 from datasets import load_dataset
-from parameterized import parameterized
 
 from tests.test_configuration_common import ConfigTester
 from tests.test_modeling_common import ModelTesterMixin, floats_tensor, ids_tensor
@@ -31,8 +29,8 @@ from transformers.models.colpali.configuration_colpali import ColPaliConfig
 from transformers.models.colpali.modeling_colpali import ColPaliForRetrieval, ColPaliForRetrievalOutput
 from transformers.models.colpali.processing_colpali import ColPaliProcessor
 from transformers.testing_utils import (
+    backend_empty_cache,
     require_torch,
-    require_torch_sdpa,
     require_vision,
     slow,
     torch_device,
@@ -170,7 +168,6 @@ class ColPaliForRetrievalModelTester:
             "input_ids": input_ids,
             "attention_mask": attention_mask,
             "labels": input_ids,
-            "token_type_ids": torch.zeros_like(input_ids),
         }
         return config, inputs_dict
 
@@ -271,14 +268,6 @@ class ColPaliForRetrievalModelTest(ModelTesterMixin, unittest.TestCase):
     def test_training_gradient_checkpointing_use_reentrant_false(self):
         pass
 
-    @require_torch_sdpa
-    @slow
-    @parameterized.expand([("float16",), ("bfloat16",), ("float32",)])
-    def test_eager_matches_sdpa_inference(self, torch_dtype: str):
-        self.skipTest(
-            "Due to custom causal mask, there is a slightly too big difference between eager and sdpa in bfloat16."
-        )
-
     @unittest.skip(
         reason="From PaliGemma: Some undefined behavior encountered with test versions of this model. Skip for now."
     )
@@ -286,7 +275,7 @@ class ColPaliForRetrievalModelTest(ModelTesterMixin, unittest.TestCase):
         pass
 
     @unittest.skip(
-        reason="PaliGemmma's SigLip encoder uses the same initialization scheme as the Flax original implementation"
+        reason="PaliGemma's SigLip encoder uses the same initialization scheme as the Flax original implementation"
     )
     def test_initialization(self):
         pass
@@ -314,7 +303,7 @@ class ColPaliModelIntegrationTest(unittest.TestCase):
 
     def tearDown(self):
         gc.collect()
-        torch.cuda.empty_cache()
+        backend_empty_cache(torch_device)
 
     @slow
     def test_model_integration_test(self):
@@ -343,7 +332,7 @@ class ColPaliModelIntegrationTest(unittest.TestCase):
         scores = self.processor.score_retrieval(
             query_embeddings=query_embeddings,
             passage_embeddings=image_embeddings,
-        )  # (len(qs), len(ps))
+        )  # (num_queries, num_passages)
 
         assert scores.ndim == 2, f"Expected 2D tensor, got {scores.ndim}"
         assert scores.shape == (len(ds), len(ds)), f"Expected shape {(len(ds), len(ds))}, got {scores.shape}"

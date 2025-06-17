@@ -192,9 +192,9 @@ class TFDebertaV2Attention(keras.layers.Layer):
         self,
         input_tensor: tf.Tensor,
         attention_mask: tf.Tensor,
-        query_states: tf.Tensor = None,
-        relative_pos: tf.Tensor = None,
-        rel_embeddings: tf.Tensor = None,
+        query_states: Optional[tf.Tensor] = None,
+        relative_pos: Optional[tf.Tensor] = None,
+        rel_embeddings: Optional[tf.Tensor] = None,
         output_attentions: bool = False,
         training: bool = False,
     ) -> Tuple[tf.Tensor]:
@@ -306,9 +306,9 @@ class TFDebertaV2Layer(keras.layers.Layer):
         self,
         hidden_states: tf.Tensor,
         attention_mask: tf.Tensor,
-        query_states: tf.Tensor = None,
-        relative_pos: tf.Tensor = None,
-        rel_embeddings: tf.Tensor = None,
+        query_states: Optional[tf.Tensor] = None,
+        relative_pos: Optional[tf.Tensor] = None,
+        rel_embeddings: Optional[tf.Tensor] = None,
         output_attentions: bool = False,
         training: bool = False,
     ) -> Tuple[tf.Tensor]:
@@ -485,8 +485,8 @@ class TFDebertaV2Encoder(keras.layers.Layer):
         self,
         hidden_states: tf.Tensor,
         attention_mask: tf.Tensor,
-        query_states: tf.Tensor = None,
-        relative_pos: tf.Tensor = None,
+        query_states: Optional[tf.Tensor] = None,
+        relative_pos: Optional[tf.Tensor] = None,
         output_attentions: bool = False,
         output_hidden_states: bool = False,
         return_dict: bool = True,
@@ -718,9 +718,9 @@ class TFDebertaV2DisentangledSelfAttention(keras.layers.Layer):
         self,
         hidden_states: tf.Tensor,
         attention_mask: tf.Tensor,
-        query_states: tf.Tensor = None,
-        relative_pos: tf.Tensor = None,
-        rel_embeddings: tf.Tensor = None,
+        query_states: Optional[tf.Tensor] = None,
+        relative_pos: Optional[tf.Tensor] = None,
+        rel_embeddings: Optional[tf.Tensor] = None,
         output_attentions: bool = False,
         training: bool = False,
     ) -> Tuple[tf.Tensor]:
@@ -985,11 +985,11 @@ class TFDebertaV2Embeddings(keras.layers.Layer):
 
     def call(
         self,
-        input_ids: tf.Tensor = None,
-        position_ids: tf.Tensor = None,
-        token_type_ids: tf.Tensor = None,
-        inputs_embeds: tf.Tensor = None,
-        mask: tf.Tensor = None,
+        input_ids: Optional[tf.Tensor] = None,
+        position_ids: Optional[tf.Tensor] = None,
+        token_type_ids: Optional[tf.Tensor] = None,
+        inputs_embeds: Optional[tf.Tensor] = None,
+        mask: Optional[tf.Tensor] = None,
         training: bool = False,
     ) -> tf.Tensor:
         """
@@ -1255,7 +1255,7 @@ class TFDebertaV2PreTrainedModel(TFPreTrainedModel):
 
 DEBERTA_START_DOCSTRING = r"""
     The DeBERTa model was proposed in [DeBERTa: Decoding-enhanced BERT with Disentangled
-    Attention](https://arxiv.org/abs/2006.03654) by Pengcheng He, Xiaodong Liu, Jianfeng Gao, Weizhu Chen. It's build
+    Attention](https://huggingface.co/papers/2006.03654) by Pengcheng He, Xiaodong Liu, Jianfeng Gao, Weizhu Chen. It's build
     on top of BERT/RoBERTa with two improvements, i.e. disentangled attention and enhanced mask decoder. With those two
     improvements, it out perform BERT/RoBERTa on a majority of tasks with 80GB pretraining data.
 
