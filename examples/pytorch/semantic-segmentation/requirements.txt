@@ -4,3 +4,4 @@ accelerate
 evaluate
 Pillow
 albumentations >= 1.4.16
+aiohttp>=3.12.14 # not directly required, pinned by Snyk to avoid a vulnerability
