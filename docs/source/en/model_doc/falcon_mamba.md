@@ -13,6 +13,7 @@ specific language governing permissions and limitations under the License.
 rendered properly in your Markdown viewer.
 
 -->
+*This model was released on 2024-10-07 and added to Hugging Face Transformers on 2024-08-12.*
 
 <div style="float: right;">
     <div class="flex flex-wrap space-x-1">
@@ -109,6 +110,13 @@ inputs = tokenizer("Explain the concept of state space models in simple terms", 
 outputs = model.generate(**inputs, max_new_tokens=100)
 print(tokenizer.decode(outputs[0], skip_special_tokens=True))
 ```
+
+## FalconMambaCache
+
+[[autodoc]] FalconMambaCache
+    - update_conv_state
+    - update_ssm_state
+    - reset
 
 ## FalconMambaConfig
 
