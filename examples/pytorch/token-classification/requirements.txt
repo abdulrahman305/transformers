@@ -3,3 +3,5 @@ seqeval
 datasets >= 1.8.0
 torch>=2.9.0
 evaluate
+aiohttp>=3.13.3 # not directly required, pinned by Snyk to avoid a vulnerability
+urllib3>=2.6.3 # not directly required, pinned by Snyk to avoid a vulnerability
