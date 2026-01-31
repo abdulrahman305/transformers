@@ -76,7 +76,7 @@ class Llama4VisionConfig(PreTrainedConfig):
         "model.layers.*.self_attn.o_proj": "rowwise",
         "vision_adapter.mlp.fc1": "colwise",
         "vision_adapter.mlp.fc2": "rowwise",
-        "patch_embedding.linear": "colwise_rep",
+        "patch_embedding.linear": "colwise_gather_output",
     }
     model_type = "llama4_vision_model"
     base_config_key = "vision_config"
@@ -217,16 +217,14 @@ class Llama4TextConfig(PreTrainedConfig):
         "layers.*.self_attn.k_proj": "colwise",
         "layers.*.self_attn.v_proj": "colwise",
         "layers.*.self_attn.o_proj": "rowwise",
-        "layers.*.feed_forward.shared_expert.gate_proj": "local_colwise",
-        "layers.*.feed_forward.shared_expert.up_proj": "local_colwise",
-        "layers.*.feed_forward.shared_expert.down_proj": "local_rowwise",
-        "layers.*.feed_forward.experts.gate_up_proj": "local_packed_rowwise",  # row because not linear
-        "layers.*.feed_forward.experts.down_proj": "local_colwise",  # col because not linear
-        "layers.*.feed_forward.experts": "local",
-        "layers.*.feed_forward.gate_proj": "local_colwise",
-        "layers.*.feed_forward.up_proj": "local_colwise",
-        "layers.*.feed_forward.down_proj": "local_rowwise",
-        "layers.*.feed_forward": "gather",
+        "layers.*.feed_forward.shared_expert.gate_proj": "colwise",
+        "layers.*.feed_forward.shared_expert.up_proj": "colwise",
+        "layers.*.feed_forward.shared_expert.down_proj": "rowwise",
+        "layers.*.feed_forward.experts.gate_up_proj": "packed_rowwise",  # row because not linear
+        "layers.*.feed_forward.experts.down_proj": "colwise",  # col because not linear
+        "layers.*.feed_forward.gate_proj": "colwise",
+        "layers.*.feed_forward.up_proj": "colwise",
+        "layers.*.feed_forward.down_proj": "rowwise",
     }
     base_model_ep_plan = {
         "layers.*.self_attn.q_proj": "colwise",
@@ -235,10 +233,9 @@ class Llama4TextConfig(PreTrainedConfig):
         "layers.*.self_attn.o_proj": "rowwise",
         "layers.*.feed_forward.experts.gate_up_proj": "grouped_gemm",  # row because not linear
         "layers.*.feed_forward.experts.down_proj": "grouped_gemm",  # col because not linear
-        "layers.*.feed_forward.experts": "gather",  # all reduce
-        "layers.*.feed_forward.gate_proj": "local_colwise",
-        "layers.*.feed_forward.up_proj": "local_colwise",
-        "layers.*.feed_forward.down_proj": "local_rowwise",
+        "layers.*.feed_forward.gate_proj": "colwise",
+        "layers.*.feed_forward.up_proj": "colwise",
+        "layers.*.feed_forward.down_proj": "rowwise",
         "layers.*.feed_forward.router": "ep_router",
     }
 
@@ -280,6 +277,10 @@ class Llama4TextConfig(PreTrainedConfig):
         attn_scale=0.1,
         **kwargs,
     ):
+        self.tie_word_embeddings = tie_word_embeddings
+        self.pad_token_id = pad_token_id
+        self.bos_token_id = bos_token_id
+        self.eos_token_id = eos_token_id
         self.attn_temperature_tuning = attn_temperature_tuning
         self.attn_scale = attn_scale
         self.floor_scale = floor_scale
@@ -336,13 +337,7 @@ class Llama4TextConfig(PreTrainedConfig):
         layer_type_validation(self.layer_types, self.num_hidden_layers)
 
         self.rope_parameters = rope_parameters
-        super().__init__(
-            pad_token_id=pad_token_id,
-            bos_token_id=bos_token_id,
-            eos_token_id=eos_token_id,
-            tie_word_embeddings=tie_word_embeddings,
-            **kwargs,
-        )
+        super().__init__(**kwargs)
 
 
 class Llama4Config(PreTrainedConfig):
@@ -424,7 +419,8 @@ class Llama4Config(PreTrainedConfig):
         elif isinstance(text_config, Llama4TextConfig):
             self.text_config = text_config
 
-        super().__init__(tie_word_embeddings=tie_word_embeddings, **kwargs)
+        self.tie_word_embeddings = tie_word_embeddings
+        super().__init__(**kwargs)
 
 
 __all__ = ["Llama4Config", "Llama4TextConfig", "Llama4VisionConfig"]

@@ -1233,7 +1233,8 @@ class ProcessorMixin(PushToHubMixin):
 
         """
         # holding a copy to avoid mutating user-provided arguments
-        kwargs = kwargs.copy()
+        # Use deepcopy to also copy nested dicts (like videos_kwargs) that will be modified via pop()
+        kwargs = copy.deepcopy(kwargs)
 
         # Initialize dictionaries
         output_kwargs = {
@@ -1520,7 +1521,9 @@ class ProcessorMixin(PushToHubMixin):
                 if "PixtralProcessor" in cls.__name__:
                     from .tokenization_utils_tokenizers import TokenizersBackend
 
-                    tokenizer = TokenizersBackend.from_pretrained(pretrained_model_name_or_path, **kwargs)
+                    tokenizer = TokenizersBackend.from_pretrained(
+                        pretrained_model_name_or_path, subfolder=subfolder, **kwargs
+                    )
                 else:
                     tokenizer = cls._load_tokenizer_from_pretrained(
                         sub_processor_type, pretrained_model_name_or_path, subfolder=subfolder, **kwargs
